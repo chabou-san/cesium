@@ -167,34 +167,108 @@ define([
     var quat3D = new Quaternion();
 
     function createOrientations3D(path, startDirection, startUp, endDirection, endUp) {
-        var points = path.points;
-        var orientations = new Array(points.length);
-        orientations[0] = createQuaternion(startDirection, startUp);
+        if (false) {
+            // TEST CODE
+            var points = path.points;
 
-        var point;
-        var length = points.length - 1;
-        for (var i = 1; i < length; ++i) {
-            point = points[i];
-            Cartesian3.normalize(Cartesian3.negate(point, direction3D), direction3D);
-            Cartesian3.normalize(Cartesian3.cross(direction3D, Cartesian3.UNIT_Z, right3D), right3D);
-            Cartesian3.cross(right3D, direction3D, up3D);
-            orientations[i] = createQuaternion(direction3D, up3D, quat3D);
+            var newPoints = new Array(2 * points.length - 1);
+            var newTimes = new Array(2 * points.length - 1);
+            for (var i = 0; i < newPoints.length; i++) {
+                if ((i % 2) == 0) {
+                    var u = i / 2;
+                    newPoints[i] = points[u];
+                    newTimes[i] = path.times[u];
+                }
+                else {
+                    var u = (i - 1) / 2;
+                    var t = path.times[u] + (path.times[u + 1] - path.times[u]) / 2;
+                    newPoints[i] = path.evaluate(t);
+                    newTimes[i] = t;
+                }
+            };
+
+            var orientations = new Array(points.length);
+            orientations[0] = createQuaternion(startDirection, startUp);
+
+            var point;
+            var length = newPoints.length - 1;
+
+            point = newPoints[length];
+            if (defined(endDirection) && defined(endUp)) {
+                orientations[length] = createQuaternion(endDirection, endUp);
+            } else {
+                Cartesian3.normalize(Cartesian3.negate(point, direction3D), direction3D);
+                Cartesian3.normalize(Cartesian3.cross(direction3D, Cartesian3.UNIT_Z, right3D), right3D);
+                Cartesian3.cross(right3D, direction3D, endUp);
+                orientations[length] = createQuaternion(direction3D, endUp, quat3D);
+            }
+
+            for (var i = 1; i < length; ++i) {
+                point = newPoints[i];
+                Cartesian3.normalize(Cartesian3.negate(point, direction3D), direction3D);
+                Cartesian3.normalize(Cartesian3.cross(direction3D, Cartesian3.UNIT_Z, right3D), right3D);
+                Cartesian3.cross(right3D, direction3D, up3D);
+                orientations[i] = createQuaternion(direction3D, up3D, quat3D);
+            }
+
+            return new QuaternionSpline({
+                points : orientations,
+                times : newTimes
+            });
         }
+        else if (true) {
+            // TEST CODE 2
+            var points = path.points;
+            var times = new Array(2);
+            var orientations = new Array(2);
+            orientations[0] = createQuaternion(startDirection, startUp);
+            times[0] = path.times[0];
 
-        point = points[length];
-        if (defined(endDirection) && defined(endUp)) {
-            orientations[length] = createQuaternion(endDirection, endUp);
-        } else {
-            Cartesian3.normalize(Cartesian3.negate(point, direction3D), direction3D);
-            Cartesian3.normalize(Cartesian3.cross(direction3D, Cartesian3.UNIT_Z, right3D), right3D);
-            Cartesian3.cross(right3D, direction3D, up3D);
-            orientations[length] = createQuaternion(direction3D, up3D, quat3D);
+            if (defined(endDirection) && defined(endUp)) {
+                orientations[1] = createQuaternion(endDirection, endUp);
+            } else {
+                Cartesian3.normalize(Cartesian3.negate(points[points.length - 1], direction3D), direction3D);
+                Cartesian3.normalize(Cartesian3.cross(direction3D, Cartesian3.UNIT_Z, right3D), right3D);
+                Cartesian3.cross(right3D, direction3D, up3D);
+                orientations[1] = createQuaternion(direction3D, up3D, quat3D);
+            }
+            times[1] = path.times[path.times.length - 1];
+
+            return new QuaternionSpline({
+                points : orientations,
+                times : times
+            });
         }
+        else {
+            var points = path.points;
+            var orientations = new Array(points.length);
+            orientations[0] = createQuaternion(startDirection, startUp);
 
-        return new QuaternionSpline({
-            points : orientations,
-            times : path.times
-        });
+            var point;
+            var length = points.length - 1;
+            for (var i = 1; i < length; ++i) {
+                point = points[i];
+                Cartesian3.normalize(Cartesian3.negate(point, direction3D), direction3D);
+                Cartesian3.normalize(Cartesian3.cross(direction3D, Cartesian3.UNIT_Z, right3D), right3D);
+                Cartesian3.cross(right3D, direction3D, up3D);
+                orientations[i] = createQuaternion(direction3D, up3D, quat3D);
+            }
+
+            point = points[length];
+            if (defined(endDirection) && defined(endUp)) {
+                orientations[length] = createQuaternion(endDirection, endUp);
+            } else {
+                Cartesian3.normalize(Cartesian3.negate(point, direction3D), direction3D);
+                Cartesian3.normalize(Cartesian3.cross(direction3D, Cartesian3.UNIT_Z, right3D), right3D);
+                Cartesian3.cross(right3D, direction3D, up3D);
+                orientations[length] = createQuaternion(direction3D, up3D, quat3D);
+            }
+
+            return new QuaternionSpline({
+                points : orientations,
+                times : path.times
+            });
+        }
     }
 
     var scratchStartPosition = new Cartesian3();
