@@ -5,22 +5,26 @@ defineSuite([
         'Core/EllipsoidTerrainProvider',
         'Core/ScreenSpaceEventHandler',
         'Core/WebMercatorProjection',
+        'Scene/Camera',
+        'Scene/ImageryLayerCollection',
         'Scene/Scene',
         'Scene/SceneMode',
         'Scene/SkyBox',
         'Scene/TileCoordinatesImageryProvider',
-        'Specs/EventHelper'
+        'Specs/DomEventSimulator'
     ], function(
         CesiumWidget,
         Clock,
         EllipsoidTerrainProvider,
         ScreenSpaceEventHandler,
         WebMercatorProjection,
+        Camera,
+        ImageryLayerCollection,
         Scene,
         SceneMode,
         SkyBox,
         TileCoordinatesImageryProvider,
-        EventHelper) {
+        DomEventSimulator) {
     "use strict";
     /*global jasmine,describe,xdescribe,it,xit,expect,beforeEach,afterEach,beforeAll,afterAll,spyOn,runs,waits,waitsFor*/
 
@@ -50,6 +54,9 @@ defineSuite([
         expect(widget.canvas).toBeInstanceOf(HTMLElement);
         expect(widget.creditContainer).toBeInstanceOf(HTMLElement);
         expect(widget.scene).toBeInstanceOf(Scene);
+        expect(widget.imageryLayers).toBeInstanceOf(ImageryLayerCollection);
+        expect(widget.terrainProvider).toBeInstanceOf(EllipsoidTerrainProvider);
+        expect(widget.camera).toBeInstanceOf(Camera);
         expect(widget.clock).toBeInstanceOf(Clock);
         expect(widget.screenSpaceEventHandler).toBeInstanceOf(ScreenSpaceEventHandler);
         widget.render();
@@ -131,7 +138,11 @@ defineSuite([
             terrainProvider : new EllipsoidTerrainProvider()
         };
         widget = new CesiumWidget(container, options);
-        expect(widget.scene.terrainProvider).toBe(options.terrainProvider);
+        expect(widget.terrainProvider).toBe(options.terrainProvider);
+
+        var anotherProvider = new EllipsoidTerrainProvider();
+        widget.terrainProvider = anotherProvider;
+        expect(widget.terrainProvider).toBe(anotherProvider);
     });
 
     it('sets expected options skyBox', function() {
@@ -179,6 +190,20 @@ defineSuite([
         expect(contextAttributes.antialias).toEqual(webglOptions.antialias);
         expect(contextAttributes.premultipliedAlpha).toEqual(webglOptions.premultipliedAlpha);
         expect(contextAttributes.preserveDrawingBuffer).toEqual(webglOptions.preserveDrawingBuffer);
+    });
+
+    it('can enable Order Independent Translucency', function() {
+        widget = new CesiumWidget(container, {
+            orderIndependentTranslucency : true
+        });
+        expect(widget.scene.orderIndependentTranslucency).toBe(true);
+    });
+
+    it('can disable Order Independent Translucency', function() {
+        widget = new CesiumWidget(container, {
+            orderIndependentTranslucency : false
+        });
+        expect(widget.scene.orderIndependentTranslucency).toBe(false);
     });
 
     it('throws if no container provided', function() {
@@ -254,7 +279,7 @@ defineSuite([
             expect(found).toBe(true);
 
             // click the OK button to dismiss the panel
-            EventHelper.fireClick(widget._element.querySelector('.cesium-button'));
+            DomEventSimulator.fireClick(widget._element.querySelector('.cesium-button'));
 
             expect(widget._element.querySelector('.cesium-widget-errorPanel')).toBeNull();
         });

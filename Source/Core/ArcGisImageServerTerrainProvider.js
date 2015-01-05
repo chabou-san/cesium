@@ -60,7 +60,7 @@ define([
      *   token : 'KED1aF_I4UzXOHy3BnhwyBHU4l5oY6rO6walkmHoYqGp4XyIWUd5YZUC1ZrLAzvV40pR6gBXQayh0eFA8m6vPg..',
      *   proxy : new Cesium.DefaultProxy('/terrain/')
      * });
-     * scene.terrainProvider = terrainProvider;
+     * viewer.terrainProvider = terrainProvider;
      */
     var ArcGisImageServerTerrainProvider = function ArcGisImageServerTerrainProvider(options) {
         //>>includeStart('debug', pragmas.debug);
@@ -242,6 +242,18 @@ define([
      */
     ArcGisImageServerTerrainProvider.prototype.getLevelMaximumGeometricError = function(level) {
         return this._levelZeroMaximumGeometricError / (1 << level);
+    };
+
+    /**
+     * Determines whether data for a tile is available to be loaded.
+     *
+     * @param {Number} x The X coordinate of the tile for which to request geometry.
+     * @param {Number} y The Y coordinate of the tile for which to request geometry.
+     * @param {Number} level The level of the tile for which to request geometry.
+     * @returns {Boolean} Undefined if not supported, otherwise true or false.
+     */
+    ArcGisImageServerTerrainProvider.prototype.getTileDataAvailable = function(x, y, level) {
+        return undefined;
     };
 
     return ArcGisImageServerTerrainProvider;

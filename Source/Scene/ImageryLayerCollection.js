@@ -6,10 +6,10 @@ define([
         '../Core/destroyObject',
         '../Core/DeveloperError',
         '../Core/Event',
-        '../Core/Rectangle',
         '../Core/Math',
-        './ImageryLayer',
-        '../ThirdParty/when'
+        '../Core/Rectangle',
+        '../ThirdParty/when',
+        './ImageryLayer'
     ], function(
         defaultValue,
         defined,
@@ -17,10 +17,10 @@ define([
         destroyObject,
         DeveloperError,
         Event,
-        Rectangle,
         CesiumMath,
-        ImageryLayer,
-        when) {
+        Rectangle,
+        when,
+        ImageryLayer) {
     "use strict";
 
     /**
@@ -347,8 +347,8 @@ define([
      *                                             return undefined.
      *
      * @example
-     * var pickRay = viewer.scene.camera.getPickRay(windowPosition);
-     * var featuresPromise = viewer.scene.imageryLayers.pickImageryLayerFeatures(pickRay, viewer.scene);
+     * var pickRay = viewer.camera.getPickRay(windowPosition);
+     * var featuresPromise = viewer.imageryLayers.pickImageryLayerFeatures(pickRay, viewer.scene);
      * if (!Cesium.defined(featuresPromise)) {
      *     console.log('No features picked.');
      * } else {

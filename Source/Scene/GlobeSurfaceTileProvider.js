@@ -4,6 +4,7 @@ define([
         '../Core/Cartesian2',
         '../Core/Cartesian3',
         '../Core/Cartesian4',
+        '../Core/Color',
         '../Core/defined',
         '../Core/defineProperties',
         '../Core/destroyObject',
@@ -34,6 +35,7 @@ define([
         Cartesian2,
         Cartesian3,
         Cartesian4,
+        Color,
         defined,
         defineProperties,
         destroyObject,
@@ -90,8 +92,10 @@ define([
 
         this.lightingFadeOutDistance = 6500000.0;
         this.lightingFadeInDistance = 9000000.0;
+        this.hasWaterMask = false;
         this.oceanNormalMap = undefined;
         this.zoomedOutOceanSpecularIntensity = 0.5;
+        this.enableLighting = false;
 
         this._quadtree = undefined;
         this._terrainProvider = options.terrainProvider;
@@ -118,9 +122,33 @@ define([
             wireframe : false,
             boundingSphereTile : undefined
         };
+
+        this._baseColor = undefined;
+        this._firstPassInitialColor = undefined;
+        this.baseColor = new Color(0.0, 0.0, 0.5, 1.0);
     };
 
     defineProperties(GlobeSurfaceTileProvider.prototype, {
+        /**
+         * Gets or sets the color of the globe when no imagery is available.
+         * @memberof GlobeSurfaceTileProvider.prototype
+         * @type {Color}
+         */
+        baseColor : {
+            get : function() {
+                return this._baseColor;
+            },
+            set : function(value) {
+                //>>includeStart('debug', pragmas.debug);
+                if (!defined(value)) {
+                    throw new DeveloperError('value is required.');
+                }
+                //>>includeEnd('debug');
+
+                this._baseColor = value;
+                this._firstPassInitialColor = Cartesian4.fromColor(value, this._firstPassInitialColor);
+            }
+        },
         /**
          * Gets or sets the {@link QuadtreePrimitive} for which this provider is
          * providing tiles.  This property may be undefined if the provider is not yet associated
@@ -604,10 +632,6 @@ define([
             if (startIndex !== -1) {
                 tileImageryCollection.splice(startIndex, numDestroyed);
             }
-            // If the base layer has been removed, mark the tile as non-renderable.
-            if (layer.isBaseLayer()) {
-                tile.isRenderable = false;
-            }
         });
     };
 
@@ -770,7 +794,6 @@ define([
         return context.createVertexArray(vertexArray._attributes, wireframeIndexBuffer);
     }
 
-    var firstPassInitialColor = new Cartesian4(0.0, 0.0, 0.5, 1.0);
     var otherPassesInitialColor = new Cartesian4(0.0, 0.0, 0.0, 0.0);
 
     function addDrawCommandsForTile(tileProvider, tile, context, frameState, commandList) {
@@ -779,10 +802,17 @@ define([
         var viewMatrix = frameState.camera.viewMatrix;
 
         var maxTextures = context.maximumTextureImageUnits;
-        if (defined(tileProvider.oceanNormalMap)) {
+
+        var waterMaskTexture = surfaceTile.waterMaskTexture;
+        var showReflectiveOcean = tileProvider.hasWaterMask && defined(waterMaskTexture);
+        var oceanNormalMap = tileProvider.oceanNormalMap;
+        var showOceanWaves = showReflectiveOcean && defined(oceanNormalMap);
+        var hasVertexNormals = tileProvider.terrainProvider.ready && tileProvider.terrainProvider.hasVertexNormals;
+
+        if (showReflectiveOcean) {
             --maxTextures;
         }
-        if (defined(surfaceTile.waterMaskTexture)) {
+        if (showOceanWaves) {
             --maxTextures;
         }
 
@@ -797,6 +827,8 @@ define([
         var southMercatorYHigh = 0.0;
         var southMercatorYLow = 0.0;
         var oneOverMercatorHeight = 0.0;
+
+        var useWebMercatorProjection = false;
 
         if (frameState.mode !== SceneMode.SCENE3D) {
             var projection = frameState.mapProjection;
@@ -832,6 +864,8 @@ define([
                 southMercatorYLow = southMercatorY - float32ArrayScratch[0];
 
                 oneOverMercatorHeight = 1.0 / (northMercatorY - southMercatorY);
+
+                useWebMercatorProjection = true;
             }
         }
 
@@ -852,7 +886,7 @@ define([
         var otherPassesRenderState = tileProvider._blendRenderState;
         var renderState = firstPassRenderState;
 
-        var initialColor = firstPassInitialColor;
+        var initialColor = tileProvider._firstPassInitialColor;
 
         do {
             var numberOfDayTextures = 0;
@@ -882,7 +916,7 @@ define([
             command.debugShowBoundingVolume = (tile === tileProvider._debug.boundingSphereTile);
 
             Cartesian4.clone(initialColor, uniformMap.initialColor);
-            uniformMap.oceanNormalMap = tileProvider.oceanNormalMap;
+            uniformMap.oceanNormalMap = oceanNormalMap;
             uniformMap.lightingFadeDistance.x = tileProvider.lightingFadeOutDistance;
             uniformMap.lightingFadeDistance.y = tileProvider.lightingFadeInDistance;
             uniformMap.zoomedOutOceanSpecularIntensity = tileProvider.zoomedOutOceanSpecularIntensity;
@@ -955,10 +989,10 @@ define([
             // trim texture array to the used length so we don't end up using old textures
             // which might get destroyed eventually
             uniformMap.dayTextures.length = numberOfDayTextures;
-            uniformMap.waterMask = surfaceTile.waterMaskTexture;
+            uniformMap.waterMask = waterMaskTexture;
             Cartesian4.clone(surfaceTile.waterMaskTranslationAndScale, uniformMap.waterMaskTranslationAndScale);
 
-            command.shaderProgram = tileProvider._surfaceShaderSet.getShaderProgram(context, numberOfDayTextures, applyBrightness, applyContrast, applyHue, applySaturation, applyGamma, applyAlpha);
+            command.shaderProgram = tileProvider._surfaceShaderSet.getShaderProgram(context, frameState.mode, surfaceTile, numberOfDayTextures, applyBrightness, applyContrast, applyHue, applySaturation, applyGamma, applyAlpha, showReflectiveOcean, showOceanWaves, tileProvider.enableLighting, hasVertexNormals, useWebMercatorProjection);
             command.renderState = renderState;
             command.primitiveType = PrimitiveType.TRIANGLES;
             command.vertexArray = surfaceTile.vertexArray;

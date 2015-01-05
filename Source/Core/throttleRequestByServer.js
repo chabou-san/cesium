@@ -2,13 +2,11 @@
 define([
         '../ThirdParty/Uri',
         '../ThirdParty/when',
-        './defaultValue',
-        './defined'
+        './defaultValue'
     ], function(
         Uri,
         when,
-        defaultValue,
-        defined) {
+        defaultValue) {
     "use strict";
 
     var maximumRequestsPerServer = 6;
@@ -61,7 +59,7 @@ define([
         var server = getServer(url);
 
         var activeRequestsForServer = defaultValue(activeRequests[server], 0);
-        if (activeRequestsForServer > maximumRequestsPerServer) {
+        if (activeRequestsForServer >= maximumRequestsPerServer) {
             return undefined;
         }
 

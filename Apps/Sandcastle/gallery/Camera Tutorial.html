@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">  <!-- Use Chrome Frame in IE -->
-    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
     <meta name="description" content="Use the camera to control the view, and create custom event handlers for input.">
     <meta name="cesium-sandcastle-labels" content="Tutorials, Showcases">
     <title>Cesium Demo</title>
@@ -36,7 +36,7 @@ function startup(Cesium) {
 var viewer = new Cesium.Viewer('cesiumContainer');
 
 var scene = viewer.scene;
-var canvas = scene.canvas;
+var canvas = viewer.canvas;
 canvas.setAttribute('tabindex', '0'); // needed to put focus on the canvas
 canvas.onclick = function() {
     canvas.focus();
@@ -111,7 +111,7 @@ document.addEventListener('keyup', function(e) {
 }, false);
 
 viewer.clock.onTick.addEventListener(function(clock) {
-    var camera = scene.camera;
+    var camera = viewer.camera;
 
     if (flags.looking) {
         var width = canvas.clientWidth;

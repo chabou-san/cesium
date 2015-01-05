@@ -22,9 +22,11 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to contribute to Cesiu
    * [Dan Yankowsky](https://github.com/balefrost)
    * [Michael Dunkel](https://github.com/mdunkel)
    * [Pat Mahoney](https://github.com/PatMahoney)
+   * [Francesco Linsalata](https://github.com/flinsalata) 
 * [NICTA](http://www.nicta.com.au/)
    * [Chris Cooper](https://github.com/chris-cooper)
    * [Kevin Ring](https://github.com/kring)
+   * [Keith Grochow](https://github.com/kgrochow)
 * [EU Edge](http://euedge.com/)
    * [Ákos Maróy](https://github.com/akosmaroy)
 * [Raytheon Intelligence and Information Systems](http://www.raytheon.com/)
@@ -33,6 +35,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to contribute to Cesiu
    * [Evax Software](https://github.com/evax)
 * [Aviture](http://aviture.us.com)
    * [Mike Macaulay](https://github.com/mmacaula)
+* [Inovaworks](http://www.inovaworks.com/)
+   * [Sergio Flores](https://github.com/relfos)
 
 ## [Individual CLA](http://www.agi.com/licenses/individual-cla-agi-v1.0.txt)
 * [Victor Berchet](https://github.com/vicb)
@@ -47,5 +51,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to contribute to Cesiu
 * [Kevin Ring](https://github.com/kring)
 * [M.Eng. René Schwarz](https://github.com/DigNative)
 * [Gilles Cébélieu (IGN France)](https://github.com/gcebelieu)
+* [Guillaume Beraudo](https://github.com/gberaudo)
+* [Thomas Hirsch](https://github.com/relet)
 
 Also see [our contributors page](http://cesiumjs.org/contributors.html) for more information.
