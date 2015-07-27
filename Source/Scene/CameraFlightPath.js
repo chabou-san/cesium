@@ -295,14 +295,14 @@ define([
             Matrix3.fromQuaternion(orientation, rotMatrix);
 
             Matrix4.clone(camera.transform, currentFrame);
-            Matrix4.clone(Matrix4.IDENTITY, camera.transform);
+            camera._setTransform(Matrix4.IDENTITY);
 
             camera.position = path.evaluate(time, camera.position);
             camera.right = Matrix3.getRow(rotMatrix, 0, camera.right);
             camera.up = Matrix3.getRow(rotMatrix, 1, camera.up);
             camera.direction = Cartesian3.negate(Matrix3.getRow(rotMatrix, 2, camera.direction), camera.direction);
 
-            camera.setTransform(currentFrame);
+            camera._setTransform(currentFrame);
         };
 
         return update;
@@ -414,14 +414,14 @@ define([
             Matrix3.fromQuaternion(orientation, rotMatrix);
 
             Matrix4.clone(camera.transform, currentFrame);
-            Matrix4.clone(Matrix4.IDENTITY, camera.transform);
+            camera._setTransform(Matrix4.IDENTITY);
 
             camera.position = path.evaluate(time, camera.position);
             camera.right = Matrix3.getRow(rotMatrix, 0, camera.right);
             camera.up = Matrix3.getRow(rotMatrix, 1, camera.up);
             camera.direction = Cartesian3.negate(Matrix3.getRow(rotMatrix, 2, camera.direction), camera.direction);
 
-            camera.setTransform(currentFrame);
+            camera._setTransform(currentFrame);
         };
 
         return update;
@@ -526,7 +526,7 @@ define([
         var camera = scene.camera;
         var transform = options.endTransform;
         if (defined(transform)) {
-            camera.setTransform(transform);
+            camera._setTransform(transform);
         }
 
         var frustum = camera.frustum;

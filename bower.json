@@ -1,0 +1,20 @@
+{
+  "name": "cesium",
+  "version": "1.6.0",
+  "authors": [
+    "Cesium Contributors"
+  ],
+  "description": "WebGL virtual globe and map engine",
+  "main": [
+    "Build/CesiumUnminified/*"
+  ],
+  "repository": {
+    "type" : "git",
+    "url": "https://github.com/chabou-san/cesium.git"
+  },
+  "license": "Apache-2.0",
+  "homepage": "http://cesiumjs.org",
+  "ignore": [
+    "Apps", "Documentation", "launches", "Source", "Specs", "ThirdParty", "Tools", ".git*"
+  ]
+}
